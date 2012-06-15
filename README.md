@@ -1,2 +1,19 @@
-Doubletake
-==========
+# Doubletake
+Doubletake is a Java analysis tool written in Clojure which attempts to predict
+errors in changes to program code due to semantic interference in def/use pairs
+and differences in these pairs between versions of the same code.
+
+This technique is capable only of catching a limited set of errors, and
+really just ammounts to a tool whereby a programmer can re-read his code and
+say "yes I did mean that" or "oh crud oops glad I saw that before committing"
+as the case may be.
+
+Produced as a research project with Professor DeWayne E. Perry summer of 2012.
+
+### Usage
+~~~~
+$ doubletake [options] original [version1] [[version2] [version3] ..]
+~~~~
+
+### License
+Copyright (C) 2012 Reid McKenzie all rights reserved

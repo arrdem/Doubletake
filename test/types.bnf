@@ -1,0 +1,92 @@
+;-------------------------------------------------------------------------------
+; Define the PrimitiveType
+;-------------------------------------------------------------------------------
+IntegralType:
+    byte 
+    short 
+    int 
+    long 
+    char
+
+NumericType:
+    IntegralType
+    FloatingPointType
+
+PrimitiveType:
+    NumericType
+    boolean
+
+FloatingPointType:
+    float
+    double
+
+;-------------------------------------------------------------------------------
+; Setup for defining the ReferenceType(s)
+;-------------------------------------------------------------------------------
+TypeName:
+    Identifier
+    TypeName . Identifier
+
+TypeVariable:
+    Identifier
+
+TypeDeclSpecifier:
+    Identifier
+    ClassOrInterfaceType . Identifier
+
+TypeArguments:
+    < TypeArgumentList >
+
+;-------------------------------------------------------------------------------
+; Define the InterfaceType
+;-------------------------------------------------------------------------------
+InterfaceType:
+    TypeDeclSpecifier TypeArguments?
+
+;-------------------------------------------------------------------------------
+; Define the ClassType
+;-------------------------------------------------------------------------------
+ClassOrInterfaceType:
+    ClassType
+    InterfaceType
+
+ClassType:
+    TypeDeclSpecifier TypeArguments?
+
+;-------------------------------------------------------------------------------
+; Define ReferenceType
+;-------------------------------------------------------------------------------
+ArrayType:
+    Type [ ]
+
+ReferenceType:
+    ClassOrInterfaceType
+    TypeVariable
+    ArrayType
+
+AdditionalBound:
+    & InterfaceType
+
+AdditionalBoundList:
+    AdditionalBound AdditionalBoundList
+    AdditionalBound
+
+TypeBound:
+    extends TypeVariable
+    extends ClassOrInterfaceType AdditionalBoundList?
+
+TypeParameter:
+    TypeVariable TypeBound?
+
+Wildcard:
+    ? WildcardBounds?
+
+WildcardBounds:
+    extends ReferenceType
+    super ReferenceType
+
+Type:
+    PrimitiveType
+    ReferenceType
+
+

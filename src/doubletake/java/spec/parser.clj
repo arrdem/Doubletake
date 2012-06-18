@@ -63,7 +63,6 @@
       my-newline)
     #(first %)))
   
-
 (def rule
   (semantics
     (conc rule-name 
@@ -78,13 +77,18 @@
     #(let [[a][%]] (list (nth a 0) (nth a 3)))))
     
 
-(def grammer (rep* (alt my-comment rule my-newline)))
+(def grammer (rep* 
+               (alt my-comment 
+                    rule 
+                    my-newline)))
 
 (defn lex [s]
   (map first (re-seq #"(opt)|(\w+)|(    )|(\n)|(.)" s)))
 
 (defn parser [s]
-  (rule-match grammer prn prn {:remainder (lex s)}))
+  (let [[l] [(lex s)]]
+    (map #(println %) l)
+    (rule-match grammer prn prn {:remainder l})))
 
 (defn parse [fname]
   (filter #(not (= "\n" %)) (parser (slurp fname))))

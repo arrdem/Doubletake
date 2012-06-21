@@ -5,4 +5,5 @@
                  [ordered "1.3.0"]]
   :source-paths ["src/"]
   :javac-source-paths ["src/"]
-  :javac-options {:debug "true"})
+  :javac-options {:debug "true"}
+  :main doubletake.java.spec.core)

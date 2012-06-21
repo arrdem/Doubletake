@@ -123,20 +123,26 @@
 ; Define the code generation routine
 ;-------------------------------------------------------------------------------
 (defn gen-code-for-node [node]
-  ["def" (. node name) (apply (fn [x] ["alt" x])
-                            (map (fn [x] (if (= 1 (count x))
-                                            (concat ["lit"] x)
-                                            (concat ["conc"]
-                                                    (map (fn [y]  (if (re-find #"[A-Z][a-zA-Z]*" y)
-                                                                  [y]
-                                                                  (concat ["lit"] [y])))
-                                                         x))))
-                                 (. node rules)))])
+  ["def" (. node name)
+         (concat ["alt"]
+                 (map (fn [x]
+                         (if (= 1 (count x))
+                           (concat ["lit"] x)
+                           (concat ["conc"]
+                                   (map (fn [y]
+                                            (if (re-find #"[A-Z][a-zA-Z]*" y)
+                                                [y]
+                                                (concat ["lit"] [y])))
+                                        x))))
+                (. node rules)))])
+
+;(defn gen-code [scope order]
+;  (map #(gen-code-for-node (get scope %)) order))
 
 (defn gen-code [scope order]
-  ;(concat
-    ;(map #(str "(def " % ")\n") (set order))
-    (map #(gen-code-for-node (get scope %)) order));)
+  (concat
+    (map #(str "(def " % ")\n") (set order))
+    (map #(gen-code-for-node (get scope %)) order)))
 
 ;-------------------------------------------------------------------------------
 ; Define testing routines
@@ -163,3 +169,7 @@
 (def g (parse deploy-file))
 
 (def scope (make-spec-scope g))
+
+(defn -main []
+  (map (fn [x] (if (coll? x) (pprint x) (print x)))
+    (gen-code scope (make-resolve-order scope "CompilationUnit"))))

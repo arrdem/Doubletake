@@ -5,7 +5,7 @@
         ; 3rd-party
         name.choi.joshua.fnparse))
 
-(def rule-name 
+(def rule-name
   ; used to match the name of a rule, since CammelCase is used, the first char
   ; will be capitalized and that is a sufficient criteria for a name
   (term #(re-find #"[A-Z][a-zA-Z]*" %)))
@@ -47,7 +47,7 @@
 
 (def my-comment
   ; matches a line starting with the ; character
-  (semantics 
+  (semantics
     (conc
       (lit ";")
       (semantics (rep* (term #(re-find #"[^\n]" %))) #(apply str %))
@@ -62,24 +62,24 @@
       (rep+ (except (alt pattern anything) my-newline))
       my-newline)
     #(first %)))
-  
+
 (def rule
   (semantics
-    (conc rule-name 
-          (lit ":") 
+    (conc rule-name
+          (lit ":")
           my-newline
-          (rep+ 
+          (rep+
             (semantics
-              (conc indent 
+              (conc indent
                     match-expression)
             #(nth % 1)))
         my-newline)
     #(let [[a][%]] (list (nth a 0) (nth a 3)))))
-    
 
-(def grammer (rep* 
-               (alt my-comment 
-                    rule 
+
+(def grammer (rep*
+               (alt my-comment
+                    rule
                     my-newline)))
 
 (defn lex [s]

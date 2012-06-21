@@ -1,5 +1,5 @@
 (ns doubletake.java.primitives
-  (:use 
+  (:use
     ; stdlib
     clojure.set
     ; third party
@@ -66,7 +66,7 @@
     HexDigit
     HexDigit))
 
-(def UnicodeInputcharacter
+(def UnicodeInputCharacter
   ;UnicodeInputCharacter:
   ;    UnicodeEscape
   ;    RawInputCharacter
@@ -180,7 +180,7 @@
   (alt
     (lit "/")
     (conc (lit "*") CommentTailStar)
-    (conc NotStarSlash CommentTail)))
+    (conc NotStarNotSlash CommentTail)))
 
 (def CommentTail
   ; CommentTail:
@@ -229,18 +229,57 @@
   ;    char       final      interface    static      void
   ;    class      finally    long         strictfp    volatile
   ;    const      float      native       super       while
-  (appy alt
-    (map lit-conc-seq (map seq 
-                           ["abstract" "continue" "for" "new" "switch" 
-                            "assert" "default" "if" "package" "synchronized"
-                            "boolean" "do" "goto" "private" "this" "break"
-                            "double" "implements" "protected" "throw" "byte"
-                            "else" "import" "public" "throws" "case" "enum"
-                            "instanceof" "return" "transient" "catch" "extends"
-                            "int" "short" "try" "char" "final" "interface"
-                            "static" "void" "class" "finally" "long" "strictfp"
-                            "volatile" "const" "float" "native" "super" "while"
-                            ]))))
+  (alt
+    (lit-conc-seq (seq "abstract"))
+    (lit-conc-seq (seq "continue"))
+    (lit-conc-seq (seq "for"))
+    (lit-conc-seq (seq "new"))
+    (lit-conc-seq (seq "switch"))
+    (lit-conc-seq (seq "assert"))
+    (lit-conc-seq (seq "default"))
+    (lit-conc-seq (seq "if"))
+    (lit-conc-seq (seq "package"))
+    (lit-conc-seq (seq "synchronized"))
+    (lit-conc-seq (seq "boolean"))
+    (lit-conc-seq (seq "do"))
+    (lit-conc-seq (seq "goto"))
+    (lit-conc-seq (seq "private"))
+    (lit-conc-seq (seq "this"))
+    (lit-conc-seq (seq "break"))
+    (lit-conc-seq (seq "double"))
+    (lit-conc-seq (seq "implements"))
+    (lit-conc-seq (seq "protected"))
+    (lit-conc-seq (seq "throw"))
+    (lit-conc-seq (seq "byte"))
+    (lit-conc-seq (seq "else"))
+    (lit-conc-seq (seq "import"))
+    (lit-conc-seq (seq "public"))
+    (lit-conc-seq (seq "throws"))
+    (lit-conc-seq (seq "case"))
+    (lit-conc-seq (seq "enum"))
+    (lit-conc-seq (seq "instanceof"))
+    (lit-conc-seq (seq "return"))
+    (lit-conc-seq (seq "transient"))
+    (lit-conc-seq (seq "catch"))
+    (lit-conc-seq (seq "extends"))
+    (lit-conc-seq (seq "int"))
+    (lit-conc-seq (seq "short"))
+    (lit-conc-seq (seq "try"))
+    (lit-conc-seq (seq "char"))
+    (lit-conc-seq (seq "final"))
+    (lit-conc-seq (seq "interface"))
+    (lit-conc-seq (seq "static"))
+    (lit-conc-seq (seq "void"))
+    (lit-conc-seq (seq "class"))
+    (lit-conc-seq (seq "finally"))
+    (lit-conc-seq (seq "long"))
+    (lit-conc-seq (seq "strictfp"))
+    (lit-conc-seq (seq "volatile"))
+    (lit-conc-seq (seq "const"))
+    (lit-conc-seq (seq "float"))
+    (lit-conc-seq (seq "native"))
+    (lit-conc-seq (seq "super"))
+    (lit-conc-seq (seq "while"))))
 
 ;------------------------------------------------------------------------------
 ;                           3.9 Literals
@@ -278,13 +317,13 @@
   ;    DecimalNumeral IntegerTypeSuffix?
   (conc
     DecimalNumeral
-    (factor< 1 IntegerTypeSufifix)))
+    (factor< 1 IntegerTypeSuffix)))
 
 ;;;; Binary Literals
 ;;;;---------------------------------------------------------------------------
 (def BinaryNumeral
   ; BinaryNumeral:
-  ;    0 b BinaryDigits 
+  ;    0 b BinaryDigits
   ;    0 B BinaryDigits
   ; BinaryDigits:
   ;    (0|\1|_)*
@@ -308,11 +347,11 @@
   ;    0 Underscores OctalDigits
   (conc
     (lit "0")
-    (rep* (lit "_")) 
+    (rep* (lit "_"))
     (rep* OctalDigit)))
 
 (def OctalIntegerLiteral
-  ; OctalIntegerLiteral:	
+  ; OctalIntegerLiteral:
   ;    OctalNumeral IntegerTypeSuffix?
   (conc
     OctalNumeral
@@ -327,7 +366,7 @@
   (conc
     (lit "0")
     (lit "x")
-    (rep+ 
+    (rep+
       (alt
         (lit "_")
         HexDigit))))
@@ -352,7 +391,7 @@
   ; SignedInteger:
   ;    Sign? Digits
   (conc
-    (factor= 1 (alt (lit "-") (lit "+"))) 
+    (factor= 1 (alt (lit "-") (lit "+")))
     Digits))
 
 ;;;; Floating Point Literals
@@ -401,11 +440,11 @@
   (alt
     HexNumeral
     (conc HexNumeral (lit "."))
-    (conc (lit "0") 
-          (alt (lit "x") 
-               (lit "X")) 
-          (rep* HexDigit) 
-          (lit ".") 
+    (conc (lit "0")
+          (alt (lit "x")
+               (lit "X"))
+          (rep* HexDigit)
+          (lit ".")
           HexDigits)))
 
 (def BinaryExponentIndicator
@@ -484,7 +523,7 @@
   (conc
     (lit "\"")
     (factor= 1 StringCharacters)
-    (lit "\""))) 
+    (lit "\"")))
 
 ;;;; Null Literal
 ;;;;---------------------------------------------------------------------------
@@ -514,7 +553,7 @@
 ;                           3.8 Identifiers
 ;------------------------------------------------------------------------------
 (def Identifier
-  ; An identifier is an unlimited-length sequence of Java letters and Java 
+  ; An identifier is an unlimited-length sequence of Java letters and Java
   ; digits, the first of which must be a Java letter.
   ;
   ; Excludes all keywords and the Boolean/Null literals
@@ -545,11 +584,24 @@
   ;    +   -   *   /   &   |   ^   %   <<   >>   >>>
   ;    +=  -=  *=  /=  &=  |=  ^=  %=  <<=  >>=  >>>=
   (alt
-    (map lit-conc-seq 
+    (map lit-conc-seq
          (map seq ["=" ">" "<" "!" "~" "?" ":" "==" "<=" ">=" "!=" "&&" "||"
-                   "++" "--" "+" "-" "*" "/" "&" "|" "^" "%" "<<" ">>" ">>>" 
+                   "++" "--" "+" "-" "*" "/" "&" "|" "^" "%" "<<" ">>" ">>>"
                    "+=" "-=" "*=" "/=" "&=" "|=" "^=" "%=" "<<=" ">>=" ">>>="
                    ]))))
+
+(def Separator
+  (alt
+    (lit "(")
+    (lit ")")
+    (lit "[")
+    (lit "]")
+    (lit "{")
+    (lit "}")
+    (lit ";")
+    (lit ",")
+    (lit ".")))
+
 
 ;------------------------------------------------------------------------------
 ;                           3.5 Input Elements and Tokens
@@ -566,7 +618,7 @@
     Identifier
     Keyword
     Literal
-    Seperator
+    Separator
     Operator))
 
 (def InputElement

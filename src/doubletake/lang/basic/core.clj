@@ -1,5 +1,6 @@
 (ns doubletake.lang.basic.core
-  (:use doubletake.lang.basic.parser
+  (:use clojure.set 
+        doubletake.lang.basic.parser
         [doubletake.parser.util :as util]))
 
 (defn _processor [ast]
@@ -7,8 +8,17 @@
   ; def and use pairs.
 )
 
-(defn parse [file]
-  (util/parser Lines (re-all-matches util/splitter (slurp file))))
+(defn parse [input]
+  (cond
+    (string? input)
+      (util/parser Lines 
+                   (util/prep (util/re-all-matches util/splitter 
+                                                   input)))
+    true
+      (util/parser Lines 
+                   (util/prep (util/re-all-matches util/splitter 
+                                                   (slurp input))))))
+
 
 (defn process [file]
   (_processor (parse file)))

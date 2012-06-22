@@ -18,6 +18,15 @@
         (do
           (recur (re-find matcher) (concat result [match])))))))
 
+(def banned #{" " "\t"})
+
+(defn prep [banned tokens]
+  ; takes the result of re-all-matches and cleans it into a stream of single
+  ; tokens which fnparse can consume.
+  (filter #(not (contains? banned %))
+          (map #(first %)
+               tokens)))
+
 (def splitter 
   #"(\w+)|(.)")
 

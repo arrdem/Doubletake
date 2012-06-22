@@ -26,8 +26,8 @@
 (defn lex [s] 
   (map first (re-all-matches splitter s)))
 
-(defn parser [grammar s]
-  (rule-match grammar prn prn {:remainder (lex s)}))
+(defn parser [grammar tokens]
+  (rule-match grammar prn prn {:remainder tokens}))
 
 
 

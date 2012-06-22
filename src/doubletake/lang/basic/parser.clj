@@ -18,29 +18,29 @@
 
 (def ID
   (conc
-    (rep+ (lit-alt-seq (seq 
-                  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ")))
+    (term #(re-matches #"[a-zA-Z]+" %))
     (opt (lit "$"))))
 
 (def BString
-  (conc
-    (lit "\"")
-    (rep* (except anything (lit "\"")))
-    (lit "\"")))
+  (semantics
+    (conc
+      (lit "\"")
+      (rep* (except anything (lit "\"")))
+      (lit "\""))
+    #(apply str (interpose " " (filter (fn [x] (not (= x "\""))) %)))))
 
 (def BInteger
-  (conc
-    (rep+
-      (lit-alt-seq (seq "1234567890")))
-    (followed-by (except anything (lit ".")))))
-
+  (semantics (term #(re-matches #"[0-9]+" %)) #(Integer. %)))
+   
 (def BReal
-  (conc
-    (rep+
-      (lit-alt-seq (seq "1234567890")))
-    (lit ".")
-    (rep+
-      (lit-alt-seq (seq "1234567890")))))
+  (semantics
+    (conc
+      (rep+
+        (lit-alt-seq (seq "1234567890")))
+      (lit ".")
+      (rep+
+        (lit-alt-seq (seq "1234567890"))))
+    #(Double. %)))
 
 (def Constant
   (alt
@@ -129,7 +129,7 @@
   (foo-list Constant (lit ",")))
 
 (def Integer-List
-  (foo-list Integer (lit ",")))
+  (foo-list BInteger (lit ",")))
 
 (def Expression-List
   (foo-list Expression (lit ",")))
@@ -142,18 +142,18 @@
 
 (def Statement
   (alt
-    (conc (lit "CLOSE") (lit "#") Integer)
+    (conc (lit "CLOSE") (lit "#") BInteger)
     (conc (lit "DIM") ID Constant-List)
     (lit "END")
-    (conc (lit "FOR") ID (lit "=") Expression (lit "TO") Expression (opt (conc (lit "STEP") Integer)))
-    (conc (lit "GOTO") Expression)
+    (conc (lit "FOR") ID (lit "=") Expression (lit "TO") Expression (opt (conc (lit "STEP") BInteger)))
+    (conc (lit "GOTO") (alt BInteger ID))
     (conc (lit "GOSUB") Expression)
     (conc (lit "IF") Expression (lit "THEN") Statement)
     (conc (lit "INPUT") ID-List)
-    (conc (lit "OPEN") Value (lit "FOR") Access (lit "AS") (lit "#") Integer)
+    (conc (lit "OPEN") Value (lit "FOR") Access (lit "AS") (lit "#") BInteger)
     (conc (lit "POKE") Value-List)
     (conc (lit "PRINT") Print-list)
-    (conc (lit "PRINT") (lit "#") Integer (lit ",") Print-list)
+    (conc (lit "PRINT") (lit "#") BInteger (lit ",") Print-list)
     (conc (lit "READ") ID-List)
     (lit "RETURN")
     (lit "RESTORE")
@@ -165,5 +165,5 @@
 
 (def Lines
   (rep+
-    (conc Integer Statements NewLine)))
+    (conc BInteger Statement NewLine)))
 

@@ -9,6 +9,10 @@
 ; anyone else who wants to write a language module) would otherwise have
 ; to re-write for ever freaking time.
 
+(defmacro join-semantics [rule]
+  (semantics rule
+             #(apply str %)))
+
 (defn re-all-matches [pattern string]
   (let [matcher (re-matcher pattern string)]
     (loop [match  (re-find matcher)

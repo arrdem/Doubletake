@@ -12,6 +12,10 @@
 (defmacro re-term [pattern]
   (term #(re-matches pattern %)))
 
+(defmacro join-semantics [rule]
+  (semantics rule
+             #(apply str %)))
+
 (defn re-all-matches [pattern string]
   (let [matcher (re-matcher pattern string)]
     (loop [match  (re-find matcher)

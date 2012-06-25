@@ -9,9 +9,6 @@
 ; anyone else who wants to write a language module) would otherwise have
 ; to re-write for ever freaking time.
 
-(defmacro re-term [pattern]
-  (term #(re-matches pattern %)))
-
 (defmacro join-semantics [rule]
   (semantics rule
              #(apply str %)))

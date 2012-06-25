@@ -11,14 +11,21 @@
 
 (defn re-all-matches [pattern string]
   (let [matcher (re-matcher pattern string)]
-    (println (type matcher))
     (loop [match  (re-find matcher)
            result []]
       (if (nil? match)
         result
         (do
-          (println match " - " result)
           (recur (re-find matcher) (concat result [match])))))))
+
+(def banned #{" " "\t"})
+
+(defn prep [banned tokens]
+  ; takes the result of re-all-matches and cleans it into a stream of single
+  ; tokens which fnparse can consume.
+  (filter #(not (contains? banned %))
+          (map #(first %)
+               tokens)))
 
 (def splitter 
   #"(\w+)|(.)")

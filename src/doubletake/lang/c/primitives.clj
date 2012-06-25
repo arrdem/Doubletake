@@ -2,14 +2,15 @@
   (:use
      ; stdlib
      [clojure.set]
+     [doubletake.parser.util]
      ; third party
      [name.choi.joshua.fnparse]))
 
 (def D    (term #(re-matches #"[0-9]" %)))
 (def L    (term #(re-matches #"[a-zA-Z_]" %)))
 (def H    (term #(re-matches #"[a-fA-F0-9]" %)))
-(def E    (term #(re-matches #"([Ee][+-]?{D}+)" %)))
-(def P    (term #(re-matches #"([Pp][+-]?{D}+)" %)))
+(def E    (conc (alt (lit "e") (lit "E")) (opt (alt (lit "+") (lit "-"))) (rep+ D)))
+(def P    (conc (alt (lit "P") (lit "p")) (opt (alt (lit "+") (lit "-"))) (rep+ D)))
 (def FS   (term #(re-matches #"(f|F|l|L)" %)))
 (def IS   (term #(re-matches #"((u|U)|(u|U)?(l|L|ll|LL)|(l|L|ll|LL)(u|U))" %)))
 
@@ -18,6 +19,10 @@
 (def comment-line
   (conc (lit "/") (lit "/") (rep* (except anything (lit "\n")))))
 
+(def IDENTIFIER   (conc (re-term #"[a-zA-Z_$]")
+                        (rep* (re-term #"[a-zA-Z0-9_$]"))))
+
+(def DO           (lit "do"))
 (def AUTO         (lit "auto"))
 (def BOOL         (lit "_Bool"))
 (def BREAK        (lit "break"))
@@ -80,9 +85,9 @@
 
 (def CONSTANT
   (alt
-    (term (assert (= true false)))
+    (assert (= true false))
     (conc (lit "0") (alt (lit "x") (lit "X")) (rep+ H) (opt IS))
-    (conc (lit "0") (rep* (term (re-matches #"[0-7]" %))) (opt IS))
+    (conc (lit "0") (rep* (term #(re-matches #"[0-7]" %))) (opt IS))
     (conc (term #(re-matches #"[1-9]" %)) (rep* D) (opt IS))
     (conc (opt L) (rep+ (except anything (term #(re-matches #"[^'\n]" %)))))
     (conc (rep+ D) D (opt FS))
@@ -92,4 +97,4 @@
     (conc (lit "0") (alt (lit "x") (lit "X")) (rep+ H (lit ".") (rep* H) (opt P) (opt FS)))))
 
 (def STRING_LITERAL
-  (term #(re-matches #"L?\"(\\.|[^\\"\n])*\"")))
+  (term #(re-matches #"L?\"(\.|[^\"\n])*\"")))

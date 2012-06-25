@@ -1,7 +1,5 @@
 (ns doubletake.lang.c.parser
   (:use
-     ; stdlib
-     [clojure.set]
      ; this codebase
      doubletake.lang.c.primitives
      ; third party
@@ -258,7 +256,7 @@
        IMAGINARY
        struct_or_union_specifier
        enum_specifier
-       TYPE_NAME))
+       type_name))
 
 (def struct_or_union_specifier
   (alt (conc struct_or_union IDENTIFIER (lit "{") struct_declaration_list (lit "}"))
@@ -422,7 +420,7 @@
 
 (def block_item_list
   (alt (conc block_item_list block_item)
-       block_item)))
+       block_item))
 
 (def block_item
   (alt declaration

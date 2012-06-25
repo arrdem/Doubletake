@@ -34,9 +34,6 @@
 (def splitter 
   #"(\w+)|(.)")
 
-(defn lex [s] 
-  (map first (re-all-matches splitter s)))
-
 (defn parser [grammar tokens]
   (rule-match grammar prn prn {:remainder tokens}))
 

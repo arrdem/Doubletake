@@ -1,9 +1,9 @@
-(ns doubletake.java.syntax
+(ns doubletake.lang.java.syntax
   (:use 
     ; stdlib
     clojure.set
     ; this codebase
-    doubletake.java.primitives
+    doubletake.lang.java.primitives
     ; third party
     name.choi.joshua.fnparse))
 

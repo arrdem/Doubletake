@@ -1,4 +1,4 @@
-(ns doubletake.java.primitives
+(ns doubletake.lang.java.primitives
   (:use
     ; stdlib
     clojure.set

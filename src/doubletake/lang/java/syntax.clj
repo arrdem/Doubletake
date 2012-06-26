@@ -154,7 +154,8 @@
       (conc (opt Annotations)
             (lit "package")
             QualifiedIdentifier
-            (lit ";")))
+            (lit ";")
+            (opt (lit "\n"))))
     (rep* ImportDeclaration)
     (rep* TypeDeclaration)))
 
@@ -166,12 +167,13 @@
       QualifiedIdentifier
       (opt (conc (lit ".") (lit "*"))))
 
-    (lit ";")))
+    (lit ";")
+    (opt (lit "\n"))))
 
 (def TypeDeclaration
   (alt
     ClassOrInterfaceDeclaration
-    (conc (lit ";"))))
+    (conc (lit ";") (lit "\n"))))
 
 (def ClassOrInterfaceDeclaration
   (conc (rep* Modifier)

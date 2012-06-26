@@ -89,20 +89,21 @@
 
 (def EscapeSequence
   ; EscapeSequence:
-  ;    \ b    /* \u0008: backspace BS */
-  ;    \ t    /* \u0009: horizontal tab HT */
-  ;    \ n    /* \u000a: linefeed LF */
-  ;    \ f    /* \u000c: form feed FF */
-  ;    \ r    /* \u000d: carriage return CR */
-  ;    \ "    /* \u0022: double quote " */
-  ;    \ '    /* \u0027: single quote ' */
-  ;    \ \              /* \u005c: backslash \ */
-  ;    OctalEscape        /* \u0000 to \u00ff: from octal value */
+  ;    \ b           /* \u0008: backspace BS */
+  ;    \ t           /* \u0009: horizontal tab HT */
+  ;    \ n           /* \u000a: linefeed LF */
+  ;    \ f           /* \u000c: form feed FF */
+  ;    \ r           /* \u000d: carriage return CR */
+  ;    \ "           /* \u0022: double quote " */
+  ;    \ '           /* \u0027: single quote ' */
+  ;    \ \           /* \u005c: backslash \ */
+  ;    OctalEscape   /* \u0000 to \u00ff: from octal value */
   (alt
     (conc
       (lit "\\")
       (alt
-        (lit "b") (lit "t") (lit "n") (lit "f") (lit "r") (lit "\"") (lit "'") (lit "\\")))
+        (lit "b") (lit "t") (lit "n") (lit "f") (lit "r") (lit "\"") 
+        (lit "'") (lit "\\")))
     OctalEscape))
 ;------------------------------------------------------------------------------
 ;                           3.4 Line Terminators
@@ -230,56 +231,56 @@
   ;    class      finally    long         strictfp    volatile
   ;    const      float      native       super       while
   (alt
-    (lit-conc-seq (seq "abstract"))
-    (lit-conc-seq (seq "continue"))
-    (lit-conc-seq (seq "for"))
-    (lit-conc-seq (seq "new"))
-    (lit-conc-seq (seq "switch"))
-    (lit-conc-seq (seq "assert"))
-    (lit-conc-seq (seq "default"))
-    (lit-conc-seq (seq "if"))
-    (lit-conc-seq (seq "package"))
-    (lit-conc-seq (seq "synchronized"))
-    (lit-conc-seq (seq "boolean"))
-    (lit-conc-seq (seq "do"))
-    (lit-conc-seq (seq "goto"))
-    (lit-conc-seq (seq "private"))
-    (lit-conc-seq (seq "this"))
-    (lit-conc-seq (seq "break"))
-    (lit-conc-seq (seq "double"))
-    (lit-conc-seq (seq "implements"))
-    (lit-conc-seq (seq "protected"))
-    (lit-conc-seq (seq "throw"))
-    (lit-conc-seq (seq "byte"))
-    (lit-conc-seq (seq "else"))
-    (lit-conc-seq (seq "import"))
-    (lit-conc-seq (seq "public"))
-    (lit-conc-seq (seq "throws"))
-    (lit-conc-seq (seq "case"))
-    (lit-conc-seq (seq "enum"))
-    (lit-conc-seq (seq "instanceof"))
-    (lit-conc-seq (seq "return"))
-    (lit-conc-seq (seq "transient"))
-    (lit-conc-seq (seq "catch"))
-    (lit-conc-seq (seq "extends"))
-    (lit-conc-seq (seq "int"))
-    (lit-conc-seq (seq "short"))
-    (lit-conc-seq (seq "try"))
-    (lit-conc-seq (seq "char"))
-    (lit-conc-seq (seq "final"))
-    (lit-conc-seq (seq "interface"))
-    (lit-conc-seq (seq "static"))
-    (lit-conc-seq (seq "void"))
-    (lit-conc-seq (seq "class"))
-    (lit-conc-seq (seq "finally"))
-    (lit-conc-seq (seq "long"))
-    (lit-conc-seq (seq "strictfp"))
-    (lit-conc-seq (seq "volatile"))
-    (lit-conc-seq (seq "const"))
-    (lit-conc-seq (seq "float"))
-    (lit-conc-seq (seq "native"))
-    (lit-conc-seq (seq "super"))
-    (lit-conc-seq (seq "while"))))
+    (lit "abstract")
+    (lit "continue")
+    (lit "for")
+    (lit "new")
+    (lit "switch")
+    (lit "assert")
+    (lit "default")
+    (lit "if")
+    (lit "package")
+    (lit "synchronized")
+    (lit "boolean")
+    (lit "do")
+    (lit "goto")
+    (lit "private")
+    (lit "this")
+    (lit "break")
+    (lit "double")
+    (lit "implements")
+    (lit "protected")
+    (lit "throw")
+    (lit "byte")
+    (lit "else")
+    (lit "import")
+    (lit "public")
+    (lit "throws")
+    (lit "case")
+    (lit "enum")
+    (lit "instanceof")
+    (lit "return")
+    (lit "transient")
+    (lit "catch")
+    (lit "extends")
+    (lit "int")
+    (lit "short")
+    (lit "try")
+    (lit "char")
+    (lit "final")
+    (lit "interface")
+    (lit "static")
+    (lit "void")
+    (lit "class")
+    (lit "finally")
+    (lit "long")
+    (lit "strictfp")
+    (lit "volatile")
+    (lit "const")
+    (lit "float")
+    (lit "native")
+    (lit "super")
+    (lit "while")))
 
 ;------------------------------------------------------------------------------
 ;                           3.9 Literals
@@ -559,8 +560,7 @@
   ; Excludes all keywords and the Boolean/Null literals
   (except
     (conc
-      (term #(re-matches #"[a-zA-Z$_]" %))
-      (rep* (term #(re-matches #"[a-zA-Z0-9$_]" %))))
+      (re-term #"[a-zA-Z$_][a-zA-Z0-9$_]*"))
     (alt
       Keyword
       BooleanLiteral

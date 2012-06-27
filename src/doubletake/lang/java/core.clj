@@ -11,12 +11,13 @@
 
 (defn lex [input] 
   (util/prep util/banned 
-             (map first 
-                  (re-seq #"(\w+)|." input))))
+             (re-seq #"(\w+)|." input)))
 
-(defn parse [input rule]
+(defn parse 
+  ([input rule]
   ; takes a raw string of text as input, and parses it into an AST
   (util/parser rule (lex input)))
+  ([input] (parse input CompilationUnit)))
 
 (defn process [f]
   ; takes a file path or file object as its argument, and executes the entire

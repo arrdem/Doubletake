@@ -222,12 +222,13 @@
 
 (def Type
   (alt
-    (conc BasicType (rep* (lit-conc-seq (seq "[]"))))
-    (conc ReferenceType (rep* (lit-conc-seq (seq "[]"))))))
+    (conc BasicType (rep* (conc (lit "[") (lit "]"))))
+    (conc ReferenceType (rep* (conc (lit "[") (lit "]"))))))
 
 (def BasicType
   (lit-alt-seq
     ["byte"
+     "void"
      "short"
      "char"
      "int"
@@ -373,20 +374,18 @@
 
 (def ClassBodyDeclaration
   (alt
-    (lit ";")
-    (conc (rep* (conc Modifier)
-                MemberDecl))
+    (conc (rep* (conc (rep+ Modifier) MemberDecl)))
     (conc (opt (lit "static")) Block)))
 
 (def MemberDecl
   (alt
-    MethodOrFieldDecl
-    (conc (lit "void")
+    (conc (lit "id")
           Identifier
           VoidMethodDeclaratorRest)
     (conc Identifier ConstructorDeclaratorRest)
     GenericMethodOrConstructorDecl
     ClassDeclaration
+    MethodOrFieldDecl
     InterfaceDeclaration))
 
 (def MethodOrFieldDecl

@@ -560,7 +560,7 @@
   ; Excludes all keywords and the Boolean/Null literals
   (except
     (conc
-      (re-term #"[a-zA-Z$_][a-zA-Z0-9$_]*"))
+      (re-term #"[a-zA-Z0-9$_]+"))
     (alt
       Keyword
       BooleanLiteral

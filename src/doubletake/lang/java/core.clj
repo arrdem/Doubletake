@@ -11,7 +11,7 @@
 
 (defn lex [input] 
   (util/prep util/banned 
-             (re-seq #"(\w+)|." input)))
+             (re-seq #"([\w$_]+)|." input)))
 
 (defn parse 
   ([input rule]

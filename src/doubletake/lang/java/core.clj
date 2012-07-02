@@ -38,7 +38,7 @@
   (let [text (slurp f)]
     (let [vis (. Visitor run text)]
       (set
-        (reduce conc
+        (reduce concat
                 (map make-pairs 
                      (vals (. vis data))))))))
 

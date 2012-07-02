@@ -1,13 +1,10 @@
 (ns doubletake.lang.java.core
   (:use
     [clojure.set]
-    [doubletake.lang.java.syntax]
-    [doubletake.parser.util :as util]
     [clojure.contrib.java-utils :as jutil])
   
   (:import
-    [doubletake.lang.java.Visitor]
-    [doubletake.lang.java.Variable]))
+    [doubletake.lang.java Visitor Variable Tripple]))
 
 (defn make-pairs [var]
   ; takes a Variable object and recursively generates the set of def/use/name
@@ -25,7 +22,7 @@
       (>= (first uses) (first defs)) 
         (recur defs 
                (rest uses) 
-               (conc tripples 
+               (concat tripples
                      (Tripple. (first defs)
                                (first uses)
                                (. var identifier))
@@ -35,7 +32,7 @@
     )
   )
 
-(defn process [f]
+(defn process [f] 
   ; takes a file path or file object as its argument, and executes the entire
   ; lex/parse/process process on the provided target.
   (let [text (slurp f)]
@@ -44,3 +41,4 @@
         (reduce conc
                 (map make-pairs 
                      (vals (. vis data))))))))
+

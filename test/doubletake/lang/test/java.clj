@@ -5,18 +5,41 @@
     [doubletake.lang.java.syntax :as jsyntax]
     [clojure.test]))
 
-(def test-strings
-  ["class Point { int x, y; }\n"
-   "package vista;\nclass Point { int x, y; }\n"
-   "package vista;\nimport java.util.Vector;\nclass Point { int x, y; }\n"])
+(defmacro java-parser-test [string]
+  ;`(print ~string "\n\n")
+  `(is (not (nil? (jcore/parse ~string)))))
 
-(deftest string-parse
-  (loop [cur  (first test-strings)
-         tail (rest test-strings)]
-    (let [res (jcore/parse cur)]
-      (is (not (= nil res)))
-      (println "-------------------------------------------------")
-      (print cur "\n\n")
-      (pprint res)
-      (if (not (empty? tail))
-        (recur (first tail) (rest tail))))))
+(deftest basic-package
+  (java-parser-test "package Foo;\n"))
+
+(deftest package-with-import
+  (java-parser-test
+    (str "package Foo;\n"
+         "import Clojure.Awesome.Functional;\n")))
+
+(deftest package-with-wildcard-import 
+  (java-parser-test
+    (str "package Foo;\n"
+         "import Clojure.Awesome.Functional;\n"
+         "import Foo.Bar.Baz.*;\n")))
+
+(deftest empty-class
+  (java-parser-test 
+    (str "class Bar {}\n")))
+
+(deftest class-with-modified-fields 
+  (java-parser-test 
+    (str "class Bar {\n"
+         "public int a;\n"
+         "protected int b;\n"
+         "private static int i;\n"
+         "}\n")))
+
+(deftest class-with-member-function
+  (java-parser-test
+    (str "class A_Stupid_Name {\n"
+         "    public int tarded;\n"
+         "    public A_Stupid_Name() {\n"
+         "        this.tarded = 5;\n"
+         "    }\n"
+         "}\n")))

@@ -18,6 +18,10 @@ public class Visitor extends ASTVisitor {
         this.cu = u;
     }
     
+    public HashMap<SimpleName, Variable> getData() {
+        return this.data;
+    }
+
     private void logDef(SimpleName n) {
     	Variable var = this.data.get(n);
         if(var == null){

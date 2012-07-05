@@ -11,7 +11,7 @@
   ; tripples using the data from the var's member fields
   (loop [defs (. var defs)
          uses (. var uses)
-         tripples (seq)]
+         tripples []]
     (cond
       (empty? uses) 
         tripples
@@ -32,13 +32,17 @@
     )
   )
 
-(defn process [f] 
-  ; takes a file path or file object as its argument, and executes the entire
-  ; lex/parse/process process on the provided target.
+(defn gen-tripples [vis]
+  (set
+    (reduce concat
+            (map make-pairs 
+                 (vals (. vis (getData) ))))))
+
+(defn process-text [t]
+  (let [vis (. Visitor run t)]
+    (gen-tripples vis)))
+
+(defn process-file [f] 
   (let [text (slurp f)]
-    (let [vis (. Visitor run text)]
-      (set
-        (reduce concat
-                (map make-pairs 
-                     (vals (. vis data))))))))
+    (process-text text)))
 

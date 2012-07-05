@@ -6,8 +6,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 public class Variable {
 	private SimpleName identifier;
-	private ArrayList<Integer> defs;
-	private ArrayList<Integer> uses;
+	public ArrayList<Integer> defs;
+	public ArrayList<Integer> uses;
 	
 	public Variable(SimpleName id) {
 		this.identifier = id;

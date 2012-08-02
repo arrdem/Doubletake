@@ -5,6 +5,8 @@
   ;(:import  [org.eclipse.jdt.core.dom ASTNode])
   )
 
+(def ^:dynamic *dbg* false)
+
 (defn zip [& seqs]
   (eval
     (concat '(map vector) seqs)))
@@ -24,7 +26,7 @@
 (defn prefix [s tails]
   (map #(concat s %1) tails))
 
-(defn seq-paths
+(defn paths
   "About:
     Takes a sequence object as its only argument and using the following
     sequence structure specification generates the list of all possible paths
@@ -63,20 +65,20 @@
     (= :alt sym)
         (reduce (fn [prev s]
                   (if (path-seq? s)
-                      (concat prev (seq-paths s))
+                      (concat prev (paths s))
                       (conj prev [s])))
                 [] body)
 
     (= :seq sym)
         (reduce 
           (fn [partial-paths el]
-            (println "[0]" partial-paths el)
+            (if *dbg* (println "[0]" partial-paths el))
             (let [partial-tail (if (path-seq? el)
-                                 (seq-paths el)
+                                 (paths el)
                                  [[el]])]
               (reduce 
                 (fn [finished-partials el]
-                  (println "[1]\n\t" partial-tail "\n\t" el)
+                  (if *dbg* (println "[1]\n\t" partial-tail "\n\t" el))
                   (concat finished-partials
                           (map #(apply (fn [& x] (remove nil? x)) %1)
                             (prefix (if (seq? el) el (list el)) partial-tail))))

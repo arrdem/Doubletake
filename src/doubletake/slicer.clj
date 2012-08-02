@@ -1,6 +1,9 @@
 (ns doubletake.slicer
-  (:require [doubletake.slicer-subtrees])
-  (:import  [org.eclipse.jdt.core.dom ASTNode]))
+  (:use clojure.stacktrace
+        clojure.pprint)
+  ;(:require [doubletake.slicer-subtrees])
+  ;(:import  [org.eclipse.jdt.core.dom ASTNode])
+  )
 
 (defn zip [& seqs]
   (eval
@@ -12,66 +15,74 @@
 (defn type? [o t]
   (= t (type o)))
 
+(defn path-seq? [v]
+  (and (coll? v)
+       (or (= (first v) :alt)
+           (= (first v) :seq))
+       (not (empty? (rest v)))))
+
+(defn prefix [s tails]
+  (map #(concat s %1) tails))
+
 (defn seq-paths
- "About:
-    Takes a sequence as its only argument consisting of nested objects and
-    sequences. The type of the nested sequences is used to determine whether it
-    is supposed to represent a series of objects which should be included
-    simultaneously in a slice path or whether it constitutes a list of
-    alternate paths.
+  "About:
+    Takes a sequence object as its only argument and using the following
+    sequence structure specification generates the list of all possible paths
+    down nested sequences befitting the spec.
+
+  Sequence Spec:
+    [meta & tail]
+    All valid argmuent sequences S to this function will begin with a Clojure
+    symbol which signifies whether the elements of the list represent alternate
+    paths through the list or whether they represent a sequence to be included
+    literally which may require recursion to expand into a full path.
+    
+    Valid Symbols:
+      :seq - indicates that the list is a sequence which should be included but
+             checked for recursion into other subtrees.
+
+      :alt - indicates that the list is a sequence of sequences only one of
+             which can be correctly included.
+
   Note:
-    The \"list\" type is used to denote a series of alternate paths.
-    The \"vector\" type is used to denoote a series of \"statements\".
-    The type of the outermost argument sequence is ignored.
+    The nil literal if encountered in a sequence represents that an empty edge
+    is a valid case of that sequence and causes nothing to be added to the path
+    when evaluated.
+
+  Example:
+  (seq-paths [:seq :a [:alt :b1 :b2 :b3] :c [:seq :d [:alt :e1 nil]]])
+  => [(:a :b1 :c :d :e1)
+      (:a :b1 :c :d)
+      (:a :b2 :c :d :e1)
+      (:a :b2 :c :d)
+      (:a :b3 :c :d :e1)
+      (:a :b3 :c :d)]
   "
-  [arg-seq]
-  (loop [slices [[]]
-         head   (first arg-seq)
-         tail   (rest arg-seq)]
-    (cond
-      ; the terminal case...
-      (and (nil? head) (empty? tail))
-          slices
+  [[sym & body]]
+  (cond
+    (= :alt sym)
+        (reduce (fn [prev s]
+                  (if (path-seq? s)
+                      (concat prev (seq-paths s))
+                      (conj prev [s])))
+                [] body)
 
-      ; the alternates case...
-      (list? head)
-          ; In this case map seq-paths over the list of alternates to get the
-          ; list of lists of a
-          (let [n (map seq-paths head)]
-            (recur
-              (reduce (fn [prev x] 
-                        (concat prev (map #(concat % x) slices)))
-                      [] n)
-              (first tail)
-              (rest tail)))
+    (= :seq sym)
+        (reduce 
+          (fn [partial-paths el]
+            (println "[0]" partial-paths el)
+            (let [partial-tail (if (path-seq? el)
+                                 (seq-paths el)
+                                 [[el]])]
+              (reduce 
+                (fn [finished-partials el]
+                  (println "[1]\n\t" partial-tail "\n\t" el)
+                  (concat finished-partials
+                          (map #(apply (fn [& x] (remove nil? x)) %1)
+                            (prefix (if (seq? el) el (list el)) partial-tail))))
+                [] partial-paths)))
+          [nil] body)
 
-
-      ; the sequence case...
-      (vector? head)
-          ; This case is pretty simillar to the alternate case, in that it
-          ; requires calculating the seq-paths of the argument list. Note that
-          ; here we care about the actual seq-paths evaluation OF THE ENTIRE
-          ; VECTOR not the seq-paths of the individual elements.
-          (let [n (apply seq-paths head)]
-            (recur (map (fn [s] (map #(concat s %) n)) slice)
-                   (first tail)
-                   (rest tail)))
-
-      ; the ASTNode case...
-      (type? head ASTNode)
-          ; This case is used to evaluate the subtrees of the targeted node
-          ; when slicing paths through and Eclipse AST as this code is intended
-          ; to do.
-          (let [st (subtrees head)]
-            (recur slices
-                   (if (or (nil? st) (empty? st)) head st)
-                   tail))
-
-      ; the atom case...
-      :else
-            ; This case is used as the default and should be hit only in
-            ; testing.
-         (recur (map #(conj % head) slices)
-                (first tail)
-                (rest tail)))))
-
+    :else 
+        (concat [sym] body)
+    ))

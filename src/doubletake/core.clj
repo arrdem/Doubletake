@@ -1,2 +1,6 @@
-(ns doubletake.core
-  :use [doubletake.parser])
+(ns doubletake.core)
+
+(defn -main
+  "I don't do a whole lot."
+  [& args]
+  (println "Hello, World!"))

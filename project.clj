@@ -1,9 +1,8 @@
-(defproject doubletake "1.0.0-SNAPSHOT"
-  :description "A semantic interference detector for Java"
-  :dependencies [[org.clojure/clojure "1.2.0"]
-                 [fnparse "2.2.7"]
-                 [ordered "1.3.0"]]
-  :source-paths ["src/"]
-  :javac-source-paths ["src/"]
-  :javac-options {:debug "true"}
-  :main doubletake.java.spec.core)
+(defproject doubletake "0.1.0-SNAPSHOT"
+  :description "FIXME: write description"
+  :url "http://example.com/FIXME"
+  :license {:name "Eclipse Public License"
+            :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :dependencies [[org.clojure/clojure "1.4.0"]
+                 [org.eclipse/sdk "0.1.0"]
+                 ])

@@ -1,4 +1,5 @@
 (ns doubletake.levenshtein)
+;------------------------------------------------------------------------------
 ; This file provides two implementations of the Levenshtein edit distance
 ; algorithm, one of which simply calculates the length of the shortest edit
 ; script and the other of which actually yields an edit script.
@@ -23,7 +24,7 @@
            (inc (levenshtein-distance-slow (rest seq1) seq2))    ;; insertion
            (inc (levenshtein-distance-slow seq1 (rest seq2)))))) ;; deletion
 
-(def levenshtein-distance-slow (memoize _levenshtein-distance))
+(def levenshtein-distance-slow (memoize _levenshtein-distance-slow))
 
 (defn _levenshtein-script-slow
   "About:
@@ -60,7 +61,7 @@
                   (= ins-len (min sub-len ins-len del-len)) ins
                   :else del)))))
 
-(def levenshtein-script-slow (memoize _levenshtein-script))
+(def levenshtein-script-slow (memoize _levenshtein-script-slow))
 
 ;------------------------------------------------------------------------------
 ; An anternate and hopefully much faster implementation based instead on the
@@ -71,7 +72,7 @@
 (defmacro inf-fail [expr]
   `(try
     ~expr
-    (catch Exception e# Infinity)))
+    (catch IndexOutOfBoundsException e# Infinity)))
 
 (defn array-2d-long [x y]
   (into-array (map long-array (map (fn [a] (repeat x 0)) (range y)))))
@@ -82,7 +83,9 @@
 (defn aset-2d [a x y v]
   (aset (aget a y) x v))
 
-(defn levenshtein-matrix [seq1 seq2]
+(defstruct levenshtein-data :matrix :x-max :y-max)
+
+(defn levenshtein-calculation [seq1 seq2]
   (let [matrix (array-2d-long (inc (count seq1)) (inc (count seq2)))]
     (doseq [x (range (inc (count seq1))) y [0]]
       (aset-2d matrix x y x))
@@ -98,32 +101,26 @@
                      (inc (min (aget-2d matrix (dec x) y)
                                (aget-2d matrix x (dec y))
                                (aget-2d matrix (dec x) (dec y)))))))
-    matrix))
+    (struct levenshtein-data 
+            matrix
+            (inc (count seq1))
+            (inc (count seq2))
+            )))
 
-(defn levenshtein-matrix->script [matrix]
-  (loop [x 0 
-         y 0 
+(defn levenshtein-data->script [{:keys [matrix x-max y-max]}]
+  (loop [x x-max 
+         y y-max
          script []]
-    (let [del (inf-fail (aget-2d matrix (inc x) y))
-          ins (inf-fail (aget-2d matrix x (inc y)))
-          sub (inf-fail (aget-2d matrix (inc x) (inc y)))
-          m   (inf-fail (min del ins sub))]
+    (let [_   (inf-fail (aget-2d matrix x y))
+          del (inf-fail (aget-2d matrix (dec x) y))
+          ins (inf-fail (aget-2d matrix x (dec y))) 
+          sub (inf-fail (aget-2d matrix (dec x) (dec y)))
+          m   (min del ins sub)]
       (cond
-        (and (= del Infinity) (= ins Infinity) (= sub Infinity)) script
-        (= m sub) (recur (inc x) (inc y) (conj script (list :sub x y)))
-        (= m ins) (recur x (inc y) (conj script (list :ins y)))
-        (= m del) (recur (inc x) y (conj script (list :del x)))))))
-
-(defn clean-script [script seq1 seq2]
-  (loop [new-script  []
-         script-tail script]
-    (let [cursor (first script-tail)]
-      (cond
-        (empty? script-tail) (remove nil? new-script)
-        (= :sub (first cursor))
-            (recur (conj new-script
-                         (let [x (second cursor) y (nth cursor 2)]
-                           (if (= (nth seq1 x) (nth seq2 y)) nil cursor)))
-                   (rest script-tail))
-        :else (recur (conj new-script cursor) (rest script-tail))))))
-
+        (= 0 x y) (butlast script)
+        (= m sub) (recur (dec x) (dec y) 
+                         (if (= _ sub) 
+                           script
+                           (cons (list :sub (dec x) (dec y)) script))) 
+        (= m ins) (recur x (dec y) (cons (list :ins (dec y)) script))
+        (= m del) (recur (dec x) y (cons (list :del (dec x)) script))))))

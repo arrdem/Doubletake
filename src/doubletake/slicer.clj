@@ -1,9 +1,6 @@
 (ns doubletake.slicer
   (:use clojure.stacktrace
-        clojure.pprint)
-  ;(:require [doubletake.slicer-subtrees])
-  ;(:import  [org.eclipse.jdt.core.dom ASTNode])
-  )
+        clojure.pprint))
 
 (def ^:dynamic *dbg* false)
 
@@ -58,18 +55,17 @@
       (:a :b2 :c :d :e1)
       (:a :b2 :c :d)
       (:a :b3 :c :d :e1)
-      (:a :b3 :c :d)]
-  "
+      (:a :b3 :c :d)]"
   [[sym & body]]
-  (cond
-    (= :alt sym)
+  (case sym
+    :alt
         (reduce (fn [prev s]
                   (if (path-seq? s)
                       (concat prev (paths s))
                       (conj prev [s])))
                 [] body)
 
-    (= :seq sym)
+    :seq
         (reduce 
           (fn [partial-paths el]
             (if *dbg* (println "[0]" partial-paths el))
@@ -84,7 +80,5 @@
                             (prefix (if (seq? el) el (list el)) partial-tail))))
                 [] partial-paths)))
           [nil] body)
-
-    :else 
-        (concat [sym] body)
-    ))
+    ; default case 
+        (concat [sym] body)))

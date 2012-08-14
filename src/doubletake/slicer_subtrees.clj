@@ -109,15 +109,21 @@
                WildcardType
               ]))
 
-(defn alt [& args]
+(defn alternates [& args]
   (concat '(:alt) args))
 
-(defn seq [& args]
+(defn sequence [& args]
   (concat '(:seq) args))
 
 (defmulti subtrees 
   "About:
-    the subtrees multimethod is an ordered way to 
+    The subtrees multimethod is a tool for retrieving the subtrees of any
+    arbitrary ASTNode as they would be encountered during program execution.
+  Arguments:
+    An object which subclasses the Eclipse ASTNode
+  Returns:
+    An ordered, formatted list beginning either with :alt or :seq which is
+    appropriate for feeding directly to doubletake.slicer/paths."
   class)
 
     (defmethod subtrees AbstractTypeDeclaration

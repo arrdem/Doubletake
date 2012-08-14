@@ -85,7 +85,7 @@
 
 (defstruct levenshtein-data :matrix :x-max :y-max)
 
-(defn levenshtein-calculation [seq1 seq2]
+(defn levenshtein-calculation [seq1 seq2 &{:keys [equality] :or {:equality =}}]
   (let [matrix (array-2d-long (inc (count seq1)) (inc (count seq2)))]
     (doseq [x (range (inc (count seq1))) y [0]]
       (aset-2d matrix x y x))
@@ -95,7 +95,7 @@
             x (range 1 (inc (count seq1)))]
       (aset-2d matrix x y
                (cond
-                 (= (nth seq1 (dec x)) (nth seq2 (dec y))) 
+                 (equality (nth seq1 (dec x)) (nth seq2 (dec y))) 
                     (aget-2d matrix (dec x) (dec y))
                  :else
                      (inc (min (aget-2d matrix (dec x) y)
@@ -107,7 +107,18 @@
             (inc (count seq2))
             )))
 
-(defn levenshtein-data->script [{:keys [matrix x-max y-max]}]
+(defn levenshtein-data->script 
+  "About:
+    Takes the levenshtein-data map computed by levenshtein-calculation and
+    uses that information to generate a more usable change representation
+  Arguments:
+    A levenshtein-data map as computed by levenshtein-calculation.
+  Returns:
+    A list of sequences of the following forms,
+    (:ins <index in final>)
+    (:del <index in initial>)
+    (:sub <index in initial> <index in final>)"
+  [{:keys [matrix x-max y-max]}]
   (loop [x x-max 
          y y-max
          script []]
@@ -124,3 +135,34 @@
                            (cons (list :sub (dec x) (dec y)) script))) 
         (= m ins) (recur x (dec y) (cons (list :ins (dec y)) script))
         (= m del) (recur (dec x) y (cons (list :del (dec x)) script))))))
+
+
+(defn edit->better-edit
+  "About:
+    The single change case of get-impacted-objects
+  Arguments:
+    A single term which represents a change, and the two sequences between
+    which the change is part of the calculated edit sequence.
+  Returns:
+    The conversion of the input change to the appropriate following, higher 
+    data value format tuple.
+    (:ins {:index-final <index in final> 
+           :value-final <object>})
+  
+    (:del {:index-init  <index in initial>
+           :value-init  <object>})
+
+    (:sub {:index-init  <index in initial>
+           :value-init  <object>
+           :index-final <index in final>
+           :value-final <object>})"
+  [[edit-type & values] seq1 seq2]
+  (case edit-type
+    :ins (list :ins {:index-final (first values)
+                     :value-final (nth seq2 (first values))})
+    :del (list :del {:index-init  (first values)
+                     :value-init  (nth seq1 (first values))})
+    :sub (list :sub {:index-init  (first values)
+                     :value-init  (nth seq1 (first values))
+                     :index-final (second values)
+                     :value-final (nth seq2 (second values))})))
